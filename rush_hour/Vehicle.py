@@ -9,7 +9,7 @@ class Orientation(Enum):
 class Vehicle:
 
     def __init__(self, size, name, orientation, x, y):
-        self._type = size
+        self._size = size
         self._name = name
         # 0 -> Horizontal
         # 1 -> Vertical
