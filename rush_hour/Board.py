@@ -56,6 +56,9 @@ class Board:
             if vehicle_name == self._board[i][j + 1]:
                 return Vehicle(2, vehicle_name, Orientation.HORIZONTAL, i, j)
 
+    def get_board_size(self):
+        return self._board_size
+
     def board_to_string(self):
         board_string = "    1 2 3 4 5 6\n"
         board_string += "  +-------------+\n"
@@ -78,23 +81,23 @@ class Board:
         vehicle = self.get_vehicle(vehicle_name)
         if vehicle is None:
             return False
-        x = vehicle._x_coordinate
-        y = vehicle._y_coordinate
+        x = vehicle.get_x_coordinate()
+        y = vehicle.get_y_coordinate()
         if self.check_move(vehicle, move_direction, steps_on_board):
             if vehicle.get_orientation() == Orientation.VERTICAL:
-                for i in range(vehicle._size):
+                for i in range(vehicle.get_size()):
                     self._board[x][y] = '.'
                     x += 1
-                for i in range(vehicle._size):
-                    self._board[vehicle._x_coordinate + i][y] = vehicle_name
+                for i in range(vehicle.get_size()):
+                    self._board[vehicle.get_x_coordinate() + i][y] = vehicle_name
                 return True
 
             if vehicle.get_orientation() == Orientation.HORIZONTAL:
-                for i in range(vehicle._size):
+                for i in range(vehicle.get_size()):
                     self._board[x][y] = '.'
                     y += 1
-                for i in range(vehicle._size):
-                    self._board[x][vehicle._y_coordinate + i] = vehicle_name
+                for i in range(vehicle.get_size()):
+                    self._board[x][vehicle.get_y_coordinate() + i] = vehicle_name
                 return True
         return False
 
@@ -114,51 +117,51 @@ class Board:
         if move_direction == Direction.UP:
             i = 1
             while i <= steps_on_board:
-                if vehicle._x_coordinate - i < 0:
+                if vehicle.get_x_coordinate() - i < 0:
                     return False
-                if self._board[vehicle._x_coordinate - i][vehicle._y_coordinate] != '.':
+                if self._board[vehicle.get_x_coordinate() - i][vehicle.get_y_coordinate()] != '.':
                     return False
                 i += 1
-            vehicle.move_vehicle(vehicle._x_coordinate - steps_on_board, vehicle._y_coordinate)
+            vehicle.move_vehicle(vehicle.get_x_coordinate() - steps_on_board, vehicle.get_y_coordinate())
             return True
         if move_direction == Direction.DOWN:
             i = 1
-            place = vehicle._x_coordinate + vehicle._size - 1
+            place = vehicle.get_x_coordinate() + vehicle.get_size() - 1
             while i <= steps_on_board:
                 if place + i >= self._board_size:
                     return False
-                if self._board[place + i][vehicle._y_coordinate] != '.':
+                if self._board[place + i][vehicle.get_y_coordinate()] != '.':
                     return False
                 i += 1
-            vehicle.move_vehicle(vehicle._x_coordinate + steps_on_board, vehicle._y_coordinate)
+            vehicle.move_vehicle(vehicle.get_x_coordinate() + steps_on_board, vehicle.get_y_coordinate())
             return True
         if move_direction == Direction.LEFT:
             i = 1
             while i <= steps_on_board:
-                if vehicle._y_coordinate - i < 0:
+                if vehicle.get_y_coordinate() - i < 0:
                     return False
-                if self._board[vehicle._x_coordinate][vehicle._y_coordinate - i] != '.':
+                if self._board[vehicle.get_x_coordinate()][vehicle.get_y_coordinate() - i] != '.':
                     return False
                 i += 1
-            vehicle.move_vehicle(vehicle._x_coordinate, vehicle._y_coordinate - steps_on_board)
+            vehicle.move_vehicle(vehicle.get_x_coordinate(), vehicle.get_y_coordinate() - steps_on_board)
             return True
         if move_direction == Direction.RIGHT:
-            place = vehicle._y_coordinate + vehicle._size - 1
+            place = vehicle.get_y_coordinate() + vehicle.get_size() - 1
             i = 1
             while i <= steps_on_board:
                 if place + i >= self._board_size:
                     return False
-                if self._board[vehicle._x_coordinate][i + place] != '.':
+                if self._board[vehicle.get_x_coordinate()][i + place] != '.':
                     return False
                 i += 1
-            vehicle.move_vehicle(vehicle._x_coordinate, vehicle._y_coordinate + steps_on_board)
+            vehicle.move_vehicle(vehicle.get_x_coordinate(), vehicle.get_y_coordinate() + steps_on_board)
             return True
         return False
 
     def win_state(self):
         my_vehicle = self.get_vehicle('X')
-        x = my_vehicle._x_coordinate
-        y = my_vehicle._y_coordinate
+        x = my_vehicle.get_x_coordinate()
+        y = my_vehicle.get_y_coordinate()
         if x != 2:
             return False
         else:

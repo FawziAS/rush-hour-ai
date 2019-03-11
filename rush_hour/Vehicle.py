@@ -26,3 +26,12 @@ class Vehicle:
 
     def get_orientation(self):
         return self._orientation
+
+    def get_x_coordinate(self):
+        return self._x_coordinate
+
+    def get_y_coordinate(self):
+        return self._y_coordinate
+
+    def get_size(self):
+        return self._size
