@@ -11,7 +11,7 @@ class Direction(Enum):
 
 
 class Board:
-    def __init__(self, initial_state):
+    def __init__(self, initial_state, heuristic):
         self._board_size = 6
         self._board = []
         for i in range(self._board_size):
@@ -19,6 +19,8 @@ class Board:
         self.parse_board(initial_state)
         self._vehicles_on_board = []
         self.set_vehicles_from_board()
+        self.heuristic = heuristic
+        self._heuristic_value = heuristic.calculate_heuristic_value(self)
 
     def parse_board(self, initial_state):
         s = 0
@@ -31,6 +33,8 @@ class Board:
         for i in range(0, self._board_size):
             for j in range(0, self._board_size):
                 if self.check_board_contains(self._board[i][j]):
+                    continue
+                elif self._board[i][j] == '.':
                     continue
                 self._vehicles_on_board.append(self.get_car(i, j))
 
@@ -77,6 +81,9 @@ class Board:
     def print_board(self):
         print(self.board_to_string())
 
+    def get_board(self):
+        return self._board
+
     def move_vehicle_on_board(self, vehicle_name, move_direction, steps_on_board):
         vehicle = self.get_vehicle(vehicle_name)
         if vehicle is None:
@@ -90,6 +97,7 @@ class Board:
                     x += 1
                 for i in range(vehicle.get_size()):
                     self._board[vehicle.get_x_coordinate() + i][y] = vehicle_name
+                self._heuristic_value = self.heuristic.calculate_heuristic_value(self)
                 return True
 
             if vehicle.get_orientation() == Orientation.HORIZONTAL:
@@ -98,8 +106,15 @@ class Board:
                     y += 1
                 for i in range(vehicle.get_size()):
                     self._board[x][vehicle.get_y_coordinate() + i] = vehicle_name
+                self._heuristic_value = self.heuristic.calculate_heuristic_value(self)
                 return True
         return False
+
+    def get_heuristic_value(self):
+        return self._heuristic_value
+
+    def update_heuristic(self, heuristic):
+        self._heuristic_value = heuristic
 
     def get_vehicle(self, vehicle_name):
         for vehicle in self._vehicles_on_board:
@@ -170,3 +185,49 @@ class Board:
                     return False
                 y += 1
             return True
+
+    def get_neighbours(self):
+        neighbours = []
+        for vehicle in self._vehicles_on_board:
+            if vehicle.get_orientation() == Orientation.HORIZONTAL:
+                # right move
+                for i in range(1, 5):
+                    neighbour_board = Board(self.get_board_str(), self.heuristic)
+                    success = neighbour_board.move_vehicle_on_board(vehicle.get_name(), Direction.RIGHT, i)
+                    if not success:
+                        break
+                    neighbours.append(neighbour_board)
+                # left move
+                for i in range(1, 5):
+                    neighbour_board = Board(self.get_board_str(), self.heuristic)
+                    success = neighbour_board.move_vehicle_on_board(vehicle.get_name(), Direction.LEFT, i)
+                    if not success:
+                        break
+                    neighbours.append(neighbour_board)
+
+            if vehicle.get_orientation() == Orientation.VERTICAL:
+                # up move
+                for i in range(1, 5):
+                    neighbour_board = Board(self.get_board_str(), self.heuristic)
+                    success = neighbour_board.move_vehicle_on_board(vehicle.get_name(), Direction.UP, i)
+                    if not success:
+                        break
+                    neighbours.append(neighbour_board)
+                # down move
+                for i in range(1, 5):
+                    neighbour_board = Board(self.get_board_str(), self.heuristic)
+                    success = neighbour_board.move_vehicle_on_board(vehicle.get_name(), Direction.DOWN, i)
+                    if not success:
+                        break
+                    neighbours.append(neighbour_board)
+        return neighbours
+
+    def get_board_str(self):
+        board_str = ""
+        for i in range(self._board_size):
+            for j in range(self._board_size):
+                board_str += self._board[i][j]
+        return board_str
+
+    def __lt__(self, other):
+        return self.get_heuristic_value() < other.get_heuristic_value()
