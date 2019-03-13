@@ -14,7 +14,7 @@ class AStar:
         while AStar.opened:
             state = heapq.heappop(AStar.opened)
             if state.win_state():
-                print("Win Path")
+                print("Solution: " + state.get_solution_path() + state.get_last_move())
                 break
             neighbor_states = state.get_neighbours()
             AStar.add_relevant_states(neighbor_states, heuristic)

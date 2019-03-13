@@ -21,6 +21,7 @@ class Board:
         self.set_vehicles_from_board()
         self.heuristic = heuristic
         self._heuristic_value = heuristic.calculate_heuristic_value(self)
+        self._solution_path = ""
 
     def parse_board(self, initial_state):
         s = 0
@@ -37,6 +38,16 @@ class Board:
                 elif self._board[i][j] == '.':
                     continue
                 self._vehicles_on_board.append(self.get_car(i, j))
+
+    def set_solution_path(self, path):
+        self._solution_path += path
+
+    def get_solution_path(self):
+        return self._solution_path
+
+    def get_last_move(self):
+        my_vehicle = self.get_vehicle("X")
+        return "XR"+str(self._board_size-my_vehicle.get_x_coordinate()+1)
 
     def check_board_contains(self, vehicle_name):
         for vehicle in self._vehicles_on_board:
@@ -196,6 +207,7 @@ class Board:
                     success = neighbour_board.move_vehicle_on_board(vehicle.get_name(), Direction.RIGHT, i)
                     if not success:
                         break
+                    neighbour_board.set_solution_path(self.get_solution_path() + vehicle.get_name()+"R"+str(i)+" ")
                     neighbours.append(neighbour_board)
                 # left move
                 for i in range(1, 5):
@@ -203,6 +215,7 @@ class Board:
                     success = neighbour_board.move_vehicle_on_board(vehicle.get_name(), Direction.LEFT, i)
                     if not success:
                         break
+                    neighbour_board.set_solution_path(self.get_solution_path() + vehicle.get_name() + "L" + str(i) + " ")
                     neighbours.append(neighbour_board)
 
             if vehicle.get_orientation() == Orientation.VERTICAL:
@@ -212,6 +225,7 @@ class Board:
                     success = neighbour_board.move_vehicle_on_board(vehicle.get_name(), Direction.UP, i)
                     if not success:
                         break
+                    neighbour_board.set_solution_path(self.get_solution_path() + vehicle.get_name() + "U" + str(i) + " ")
                     neighbours.append(neighbour_board)
                 # down move
                 for i in range(1, 5):
@@ -219,6 +233,7 @@ class Board:
                     success = neighbour_board.move_vehicle_on_board(vehicle.get_name(), Direction.DOWN, i)
                     if not success:
                         break
+                    neighbour_board.set_solution_path(self.get_solution_path() + vehicle.get_name() + "D" + str(i) + " ")
                     neighbours.append(neighbour_board)
         return neighbours
 
@@ -230,4 +245,6 @@ class Board:
         return board_str
 
     def __lt__(self, other):
+        if self.get_heuristic_value() == other.get_heuristic_value():
+            return len(self.get_solution_path()) < len(other.get_solution_path())
         return self.get_heuristic_value() < other.get_heuristic_value()

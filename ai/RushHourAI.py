@@ -4,7 +4,8 @@ from rush_hour.Board import Board
 
 
 def main():
-    initial_board = Board("A..RRRA..B.PXX.BCPQQQDCP..EDFFIIEHH.", BlockingHeuristic)
+    initial_board = Board("AAB.CCDDB..OPXX.EOPQQQEOPF.GHH.F.GII", BlockingHeuristic)
+    initial_board.print_board()
     AStar.start_a_star(initial_board, BlockingHeuristic)
 
 

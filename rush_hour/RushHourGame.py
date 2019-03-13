@@ -1,10 +1,11 @@
 from pip._vendor.distlib.compat import raw_input
 
+from ai.BlockingHeuristic import BlockingHeuristic
 from rush_hour.Board import Board, Direction
 
 
 def main():
-    board = Board("AA...OP..Q.OPXXQ.OP..Q..B...CCB.RRR.")
+    board = Board("AAB.CCDDB..OPXX.EOPQQQEOPF.GHH.F.GII", BlockingHeuristic)
     board.print_board()
     play_game_with_simple_interface(board)
 
