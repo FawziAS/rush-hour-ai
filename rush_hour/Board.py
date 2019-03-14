@@ -18,6 +18,7 @@ class Board:
             self._board.append(self._board_size * ['.'])
         self.parse_board(initial_state)
         self._vehicles_on_board = []
+        self._vehicles_on_board_dictionary = {}
         self.set_vehicles_from_board()
         self.heuristic = heuristic
         self._heuristic_value = heuristic.calculate_heuristic_value(self)
@@ -37,7 +38,9 @@ class Board:
                     continue
                 elif self._board[i][j] == '.':
                     continue
-                self._vehicles_on_board.append(self.get_car(i, j))
+                vehicle = self.get_car(i, j)
+                self._vehicles_on_board.append(vehicle)
+                self._vehicles_on_board_dictionary.update({vehicle.get_name(): vehicle})
 
     def set_solution_path(self, path):
         self._solution_path += path
@@ -47,13 +50,13 @@ class Board:
 
     def get_last_move(self):
         my_vehicle = self.get_vehicle("X")
-        return "XR"+str(self._board_size-my_vehicle.get_y_coordinate())
+        return "XR" + str(self._board_size - my_vehicle.get_y_coordinate())
 
     def check_board_contains(self, vehicle_name):
-        for vehicle in self._vehicles_on_board:
-            if vehicle.get_name() == vehicle_name:
-                return True
-        return False
+        vehicle = self._vehicles_on_board_dictionary.get(vehicle_name)
+        if vehicle is None:
+            return False
+        return True
 
     def get_car(self, i, j):
         vehicle_name = self._board[i][j]
@@ -128,9 +131,9 @@ class Board:
         self._heuristic_value = heuristic
 
     def get_vehicle(self, vehicle_name):
-        for vehicle in self._vehicles_on_board:
-            if vehicle.get_name() == vehicle_name:
-                return vehicle
+        vehicle = self._vehicles_on_board_dictionary.get(vehicle_name)
+        if vehicle is not None:
+            return vehicle
         return None
 
     def check_move(self, vehicle, move_direction, steps_on_board):
@@ -207,7 +210,8 @@ class Board:
                     success = neighbour_board.move_vehicle_on_board(vehicle.get_name(), Direction.RIGHT, i)
                     if not success:
                         break
-                    neighbour_board.set_solution_path(self.get_solution_path() + vehicle.get_name()+"R"+str(i)+" ")
+                    neighbour_board.set_solution_path(
+                        self.get_solution_path() + vehicle.get_name() + "R" + str(i) + " ")
                     neighbours.append(neighbour_board)
                 # left move
                 for i in range(1, 5):
@@ -215,7 +219,8 @@ class Board:
                     success = neighbour_board.move_vehicle_on_board(vehicle.get_name(), Direction.LEFT, i)
                     if not success:
                         break
-                    neighbour_board.set_solution_path(self.get_solution_path() + vehicle.get_name() + "L" + str(i) + " ")
+                    neighbour_board.set_solution_path(
+                        self.get_solution_path() + vehicle.get_name() + "L" + str(i) + " ")
                     neighbours.append(neighbour_board)
 
             if vehicle.get_orientation() == Orientation.VERTICAL:
@@ -225,7 +230,8 @@ class Board:
                     success = neighbour_board.move_vehicle_on_board(vehicle.get_name(), Direction.UP, i)
                     if not success:
                         break
-                    neighbour_board.set_solution_path(self.get_solution_path() + vehicle.get_name() + "U" + str(i) + " ")
+                    neighbour_board.set_solution_path(
+                        self.get_solution_path() + vehicle.get_name() + "U" + str(i) + " ")
                     neighbours.append(neighbour_board)
                 # down move
                 for i in range(1, 5):
@@ -233,7 +239,8 @@ class Board:
                     success = neighbour_board.move_vehicle_on_board(vehicle.get_name(), Direction.DOWN, i)
                     if not success:
                         break
-                    neighbour_board.set_solution_path(self.get_solution_path() + vehicle.get_name() + "D" + str(i) + " ")
+                    neighbour_board.set_solution_path(
+                        self.get_solution_path() + vehicle.get_name() + "D" + str(i) + " ")
                     neighbours.append(neighbour_board)
         return neighbours
 
