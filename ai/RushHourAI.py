@@ -2,6 +2,7 @@ import time
 
 from ai.algorithms.AStar import AStar
 from ai.heuristics.BlockingHeuristic import BlockingHeuristic
+from ai.heuristics.MinimumDistanceHeuristic import MinimumDistanceHeuristic
 from rush_hour.Board import Board
 
 
@@ -15,16 +16,17 @@ def main():
         for board_str in inputs:
             print("Problem " + str(problem_counter))
             starting_timestamp = int(time.time())
-            initial_board = Board(board_str, BlockingHeuristic)
+            initial_board = Board(board_str)
             initial_board.print_board()
-            AStar.start_a_star(initial_board, BlockingHeuristic)
+            AStar.start_a_star(initial_board, MinimumDistanceHeuristic)
             finishing_timestamp = int(time.time())
             print("Time to solve: " + str(finishing_timestamp - starting_timestamp) + " seconds.")
             AStar.reset()
             problem_counter += 1
             print("----------------------------------------")
-    finally:
         input_file.close()
+    except:
+        print("Failed to open file.")
 
 
 if __name__ == "__main__":
