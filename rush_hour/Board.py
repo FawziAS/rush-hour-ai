@@ -1,5 +1,6 @@
 from enum import Enum
 
+from ai.heuristics.ZeroHeuristic import ZeroHeuristic
 from rush_hour.Vehicle import Vehicle, Orientation
 
 
@@ -11,7 +12,7 @@ class Direction(Enum):
 
 
 class Board:
-    def __init__(self, initial_state, heuristic):
+    def __init__(self, initial_state, heuristic=ZeroHeuristic):
         self._board_size = 6
         self._board = []
         for i in range(self._board_size):
