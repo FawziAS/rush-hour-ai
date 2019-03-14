@@ -47,7 +47,7 @@ class Board:
 
     def get_last_move(self):
         my_vehicle = self.get_vehicle("X")
-        return "XR"+str(self._board_size-my_vehicle.get_x_coordinate()+1)
+        return "XR"+str(self._board_size-my_vehicle.get_y_coordinate())
 
     def check_board_contains(self, vehicle_name):
         for vehicle in self._vehicles_on_board:
