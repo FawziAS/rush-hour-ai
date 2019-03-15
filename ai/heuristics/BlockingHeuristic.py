@@ -1,6 +1,6 @@
 from rush_hour import Board, Vehicle
 
-
+# A heuristic that calculates the number of cars blocking the X car + 1
 class BlockingHeuristic:
     @staticmethod
     def calculate_heuristic_value(state):

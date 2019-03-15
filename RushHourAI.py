@@ -3,7 +3,6 @@ import sys
 from ai.algorithms.AStar import AStar
 from ai.heuristics.BlockingHeuristic import BlockingHeuristic
 from ai.heuristics.MinimumDistanceHeuristic import MinimumDistanceHeuristic
-from ai.heuristics.ZeroHeuristic import ZeroHeuristic
 from rush_hour.Board import Board
 
 
@@ -17,13 +16,14 @@ def main():
         input_file = open(FILE_PATH, 'r')
         inputs = input_file.readlines()
         problem_counter = 1
+        # taking each line in input and converting it to a Board object
         for board_str in inputs:
             print("Problem " + str(problem_counter))
             initial_board = Board(board_str)
             initial_board.print_board()
-            AStar.start_a_star(initial_board, BlockingHeuristic, time_limit)
+            AStar.start_a_star(initial_board, BlockingHeuristic, time_limit) # running AStar algorithm, to solve the current board.
             print(AStar.get_game_info())
-            AStar.reset()
+            AStar.reset() # resetting the global variables and structures that AStar stores.
             problem_counter += 1
             print("----------------------------------------")
         input_file.close()

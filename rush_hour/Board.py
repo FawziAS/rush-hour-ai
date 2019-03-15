@@ -1,6 +1,4 @@
 from enum import Enum
-
-from ai.heuristics.ZeroHeuristic import ZeroHeuristic
 from rush_hour.Vehicle import Vehicle, Orientation
 
 
@@ -127,6 +125,7 @@ class Board:
             return vehicle
         return None
 
+    # checking the move(direction and steps number) if it's valid, if it is valid, we move the vehicle on the board, if not we don't change the board
     def check_move(self, vehicle, move_direction, steps_on_board):
         if vehicle.get_orientation() == Orientation.HORIZONTAL and (
                 move_direction == Direction.DOWN or move_direction == Direction.UP):
@@ -178,6 +177,7 @@ class Board:
             return True
         return False
 
+    # checking if the current board is a win state
     def win_state(self):
         my_vehicle = self.get_vehicle('X')
         x = my_vehicle.get_x_coordinate()
@@ -191,6 +191,7 @@ class Board:
                 y += 1
             return True
 
+    # getting all the neighbor boards from current board, we create them by doing all the possible moves
     def get_neighbours(self):
         neighbours = []
         for vehicle in self._vehicles_on_board:
