@@ -30,7 +30,7 @@ class AStar:
         heapq.heappush(AStar.opened, state)
         AStar.opened_dictionary.update({initial_state_representation.get_board_str(): state})
         previous_state = state
-        curr_time = int(time.time()) - AStar.starting_timestamp
+        curr_time = float(time.time()) - AStar.starting_timestamp
         while AStar.opened and curr_time < time_limit:
             state = heapq.heappop(AStar.opened)
             AStar.opened_dictionary.pop(state.get_state_representation().get_board_str())
@@ -45,7 +45,7 @@ class AStar:
             if state.get_depth() > AStar.max_depth:
                 AStar.max_depth = state.get_depth()
             if state.get_state_representation().win_state():
-                AStar.finishing_timestamp = int(time.time())
+                AStar.finishing_timestamp = float(time.time())
                 AStar.win_depth = state.get_depth()
                 print(
                     "Solution: " + state.get_state_representation().get_solution_path() + state.get_state_representation().get_last_move())
@@ -55,8 +55,9 @@ class AStar:
             AStar.add_relevant_states(neighbor_states, heuristic, state.get_depth())
             AStar.closed.update({state.get_state_representation().get_board_str(): state})
             previous_state = state
-            curr_time = int(time.time()) - AStar.starting_timestamp
-        print("FAILED")
+            curr_time = float(time.time()) - AStar.starting_timestamp
+        if curr_time > time_limit:
+            print("FAILED")
 
     @staticmethod
     def add_relevant_states(neighbor_states, heuristic, previous_depth):

@@ -1,5 +1,4 @@
 import sys
-import time
 
 from ai.algorithms.AStar import AStar
 from ai.heuristics.BlockingHeuristic import BlockingHeuristic
@@ -12,11 +11,9 @@ def main():
     global input_file
     if len(sys.argv) < 3:
         raise Exception("Missing commandline arguments. Should have input.txt path and TimeLimit.")
-
     try:
         FILE_PATH = sys.argv[1]
-        FILE_PATH = FILE_PATH.replace("\\", "\\\\")
-        time_limit = sys.argv[2]
+        time_limit = int(sys.argv[2])
         input_file = open(FILE_PATH, 'r')
         inputs = input_file.readlines()
         problem_counter = 1
