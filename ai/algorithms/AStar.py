@@ -48,7 +48,7 @@ class AStar:
                 AStar.finishing_timestamp = float(time.time())
                 AStar.win_depth = state.get_depth()
                 print(
-                    "Solution: " + state.get_state_representation().get_solution_path() + state.get_state_representation().get_last_move())
+                    "Solution: " + state.get_state_representation().get_solution_path() + state.get_state_representation().get_last_move() + "\nSteps: " + str(state.get_state_representation()._solution_steps))
                 break
             neighbor_states = state.get_state_representation().get_neighbours()
             # AStar.nodes_num += len(neighbor_states)
@@ -101,8 +101,7 @@ class AStar:
         info += "SearchedNodes: " + str(AStar.searched_nodes) + "\n"
         info += "Penetrance: " + str(AStar.win_depth / AStar.searched_nodes) + "\n"
         info += "Avg. Heuristic: " + str(AStar.sum_heuristic / AStar.searched_nodes) + "\n"
-        info += "Effective BF: " + "\n"
-        # info += "Avg. BranchingFactor: " + str(AStar.nodes_num / AStar.searched_nodes) + "\n"
+        info += "EBF: " + str(AStar.nodes_num / AStar.searched_nodes) + "\n"
         info += "MinimumDepth: " + str(AStar.min_depth) + "\n"
         info += "MaxDepth: " + str(AStar.max_depth) + "\n"
         info += "Avg. Depth: " + str(AStar.sum_depth / AStar.searched_nodes) + "\n"
