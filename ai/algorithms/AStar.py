@@ -7,9 +7,9 @@ from ai.algorithms.StateNode import StateNode
 
 
 class AStar:
-    opened = [] # opened states list ( we implemented it as a heap so we can pop the best heuristic value state
-    opened_dictionary = {} # hash in order to find a state in open list faster
-    closed = {} # hash in order to find a state in closed faster
+    opened = []  # opened states list ( we implemented it as a heap so we can pop the best heuristic value state
+    opened_dictionary = {}  # hash in order to find a state in open list faster
+    closed = {}  # hash in order to find a state in closed faster
     # parameters for lab report investigations
     searched_nodes = 0
     nodes_num = 0
@@ -34,7 +34,7 @@ class AStar:
         curr_time = float(time.time()) - AStar.starting_timestamp
         # AStar keeps running until finding a solution or time limit exceeded
         while AStar.opened and curr_time < time_limit:
-            state = heapq.heappop(AStar.opened) # getting the best heuristic value state
+            state = heapq.heappop(AStar.opened)  # getting the best heuristic value state
             AStar.opened_dictionary.pop(state.get_state_representation().get_board_str())
             if state.get_depth() < previous_state.get_depth():
                 if AStar.min_depth == -1:
@@ -52,7 +52,7 @@ class AStar:
                 AStar.finishing_timestamp = float(time.time())
                 AStar.win_depth = state.get_depth()
                 print(
-                     "Solution: " + state.get_state_representation().get_solution_path() + state.get_state_representation().get_last_move())
+                    "Solution: " + state.get_state_representation().get_solution_path() + state.get_state_representation().get_last_move())
                 break
             neighbor_states = state.get_state_representation().get_neighbours()
             # AStar.nodes_num += len(neighbor_states)
@@ -63,7 +63,7 @@ class AStar:
         if curr_time > time_limit:
             print("FAILED")
 
-    #adds the relevant states to the heap
+    # adds the relevant states to the heap
     @staticmethod
     def add_relevant_states(neighbor_states, heuristic, previous_depth):
         for state_representation in neighbor_states:
@@ -81,7 +81,7 @@ class AStar:
                     AStar.nodes_num += 1
                     continue
                 else:
-                    #state is in closed list
+                    # state is in closed list
                     previous_heuristic_value = closed_state.get_heuristic_value()
                     # if current heuristic value is better, delete the old node from closed and add the current to open
                     if previous_heuristic_value > heuristic_value:
@@ -92,7 +92,7 @@ class AStar:
                         AStar.nodes_num += 1
                     continue
             else:
-                #state is in open list
+                # state is in open list
                 previous_heuristic_value = opened_state.get_heuristic_value()
                 # heuristic value is better that the old one
                 if previous_heuristic_value > heuristic_value:
