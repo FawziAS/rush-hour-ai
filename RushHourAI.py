@@ -4,6 +4,7 @@ from ai.algorithms.AStar import AStar
 from ai.algorithms.IDAStar import IDAStar
 from ai.heuristics.BlockingHeuristic import BlockingHeuristic
 from ai.heuristics.MinimumDistanceHeuristic import MinimumDistanceHeuristic
+from ai.heuristics.UnblockingHeuristic import UnblockingHeuristic
 from rush_hour.Board import Board
 
 
@@ -23,9 +24,9 @@ def main():
             initial_board = Board(board_str)
             initial_board.print_board()
             # running AStar algorithm, to solve the current board.
-            AStar.start_a_star(initial_board, BlockingHeuristic, time_limit)
+            # AStar.start_a_star(initial_board, UnblockingHeuristic, time_limit)
             # running AStar algorithm, to solve the current board.
-            # IDAStar.start_idas(initial_board, BlockingHeuristic, time_limit)
+            IDAStar.start_idas(initial_board, BlockingHeuristic, time_limit)
             print(AStar.get_game_info())
             AStar.reset()  # resetting the global variables and structures that AStar stores.
             problem_counter += 1

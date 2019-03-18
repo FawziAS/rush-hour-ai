@@ -250,3 +250,17 @@ class Board:
             for j in range(self._board_size):
                 board_str += self._board[i][j]
         return board_str
+
+    def get_blocking_vehicles(self):
+        blocking_vehicles = []
+        last_car = '\0'
+        my_vehicle = self.get_vehicle('X')
+        x_coordinate = my_vehicle.get_x_coordinate()
+        y_coordinate = my_vehicle.get_y_coordinate()
+        for i in range(y_coordinate, self.get_board_size()):
+            if self.get_board()[x_coordinate][i] != 'X' and self.get_board()[x_coordinate][i] != '.':
+                if self.get_board()[x_coordinate][i] == last_car:
+                    raise Exception("State not valid")
+                blocking_vehicles.append(self.get_board()[x_coordinate][i])
+                last_car = self.get_board()[x_coordinate][i]
+        return blocking_vehicles
