@@ -264,3 +264,16 @@ class Board:
                 blocking_vehicles.append(self.get_board()[x_coordinate][i])
                 last_car = self.get_board()[x_coordinate][i]
         return blocking_vehicles
+
+    def get_vehicle_theoretical_place(self,vehicle):
+        my_vehicle_x = self.get_vehicle('X').get_x_coordinate()
+        up_moves = vehicle.get_size() - (my_vehicle_x - vehicle.get_x_coordinate())
+        down_moves = vehicle.get_size() - up_moves + 1
+        if vehicle.get_x_coordinate() - up_moves < 0:
+            return vehicle.get_x_coordinate() + down_moves
+        elif vehicle.get_x_coordinate() + vehicle.get_size() + down_moves >= self.get_board_size():
+            return vehicle.get_x_coordinate() - up_moves
+        elif up_moves > down_moves:
+            return vehicle.get_x_coordinate() + down_moves
+        else:
+            return vehicle.get_x_coordinate() - up_moves
