@@ -23,7 +23,8 @@ class AStar:
     finishing_timestamp = 0
 
     @staticmethod
-    def start_a_star(initial_state_representation, heuristic, time_limit):
+    def start_a_star(initial_state_representation, heuristic, time_limit, heuristic_limit=-1):
+        # TODO: Change the return value from bool to Object or None (WinState)
         AStar.starting_timestamp = int(time.time())
         state = StateNode(initial_state_representation,
                           heuristic.calculate_heuristic_value(initial_state_representation), 1)
@@ -53,21 +54,24 @@ class AStar:
                 AStar.win_depth = state.get_depth()
                 print(
                     "Solution: " + state.get_state_representation().get_solution_path() + state.get_state_representation().get_last_move())
-                break
+                return True
             neighbor_states = state.get_state_representation().get_neighbours()
             # AStar.nodes_num += len(neighbor_states)
-            AStar.add_relevant_states(neighbor_states, heuristic, state.get_depth())
+            AStar.add_relevant_states(neighbor_states, heuristic, state.get_depth(), heuristic_limit)
             AStar.closed.update({state.get_state_representation().get_board_str(): state})
             previous_state = state
             curr_time = float(time.time()) - AStar.starting_timestamp
         if curr_time > time_limit:
             print("FAILED")
+        return False
 
     # adds the relevant states to the heap
     @staticmethod
-    def add_relevant_states(neighbor_states, heuristic, previous_depth):
+    def add_relevant_states(neighbor_states, heuristic, previous_depth, heuristic_limit=-1):
         for state_representation in neighbor_states:
             heuristic_value = heuristic.calculate_heuristic_value(state_representation)
+            if heuristic_limit != -1 and heuristic_value > heuristic_limit:
+                continue
             opened_state = AStar.opened_dictionary.get(state_representation.get_board_str())
             # state is not in the open heap
             if opened_state is None:

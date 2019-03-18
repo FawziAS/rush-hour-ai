@@ -1,10 +1,10 @@
 import time
 
-import timestamp as timestamp
-
 from ai.algorithms.DLS import DLS
 
-# Iterative deepening search, uses DLS ( Deep limited Search) for infinity times, until solution found or time limit exceeded.
+
+# Iterative deepening search, uses DLS ( Deep limited Search) for infinity times, until solution found or time limit
+# exceeded.
 class IDS:
     start_time = 0
 

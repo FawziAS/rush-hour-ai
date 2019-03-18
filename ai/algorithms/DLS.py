@@ -1,5 +1,6 @@
 from rush_hour.Board import Board
 
+
 # Depth limited search
 class DLS:
     states_stack = []
