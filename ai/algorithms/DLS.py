@@ -19,10 +19,12 @@ class DLS:
             neighbours = current_state[1].get_neighbours()
             while neighbours:
                 upcoming_state = neighbours.pop()
-                if upcoming_state.get_board_str() not in DLS.closed:
+                state = DLS.closed.get(upcoming_state.get_board_str())
+                if state is None:
                     DLS.states_stack.append((current_state[0] + 1, upcoming_state))
                     DLS.closed.update({upcoming_state.get_board_str(): upcoming_state})
-                    break
+                    # break
+        DLS.reset_stack()
         return None
 
     @staticmethod
@@ -33,3 +35,4 @@ class DLS:
     @staticmethod
     def reset_stack():
         DLS.states_stack.clear()
+        DLS.closed.clear()
