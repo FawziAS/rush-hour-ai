@@ -1,9 +1,11 @@
+import cProfile
 import logging
 import sys
 
 from ai.algorithms.AStar import AStar
 from ai.algorithms.IDAStar import IDAStar
 from ai.algorithms.IDS import IDS
+from ai.heuristics.AdvancedBlockingHeuristic import AdvancedBlockingHeuristic
 from ai.heuristics.BlockingHeuristic import BlockingHeuristic
 from ai.heuristics.MinimumDistanceHeuristic import MinimumDistanceHeuristic
 from ai.heuristics.UnblockingHeuristic import UnblockingHeuristic
@@ -26,12 +28,12 @@ def main():
             initial_board = Board(board_str)
             initial_board.print_board()
             # running AStar algorithm, to solve the current board.
-            # AStar.start_a_star(initial_board, UnblockingHeuristic, time_limit)
-            # running AStar algorithm, to solve the current board.
+            AStar.start_a_star(initial_board, AdvancedBlockingHeuristic, time_limit)
+            # running IDAStar algorithm, to solve the current board.
             # IDAStar.start_idas(initial_board, BlockingHeuristic, time_limit)
-            IDS.start_ids(initial_board, 40)
-            # print(AStar.get_game_info())
-            # AStar.reset()  # resetting the global variables and structures that AStar stores.
+            # IDS.start_ids(initial_board, 40)
+            print(AStar.get_game_info())
+            AStar.reset()  # resetting the global variables and structures that AStar stores.
             problem_counter += 1
             print("----------------------------------------")
         input_file.close()
