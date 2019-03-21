@@ -5,7 +5,7 @@ from rush_hour.Board import Board, Direction
 
 
 def main():
-    board = Board("..OAAP..OB.PXXOB.PKQQQ..KDDEF.GG.EF.", BlockingHeuristic)
+    board = Board("AA...OP..Q.OPXXQ.OP..Q..B...CCB.RRR.")
     board.print_board()
     play_game_with_simple_interface(board)
 
