@@ -55,6 +55,9 @@ class Board:
             return False
         return True
 
+    def get_vehicles_on_board(self):
+        return self._vehicles_on_board
+
     def get_car(self, i, j):
         vehicle_name = self._board[i][j]
         # In case the vehicle size is 3

@@ -16,3 +16,4 @@ class BackwardsBlockingHeuristic:
         return len(blocking_vehicles) + 1
         # return AdvancedBlockingHeuristic.calculate_heuristic_value(state) *-1
 
+
