@@ -1,7 +1,9 @@
 import heapq
+import time
 from enum import Enum
 
 from ai.algorithms.StateNode import StateNode
+from ai.heuristics.AdvancedBlockingHeuristic import AdvancedBlockingHeuristic
 from ai.heuristics.TotalDistanceHeuristic import TotalDistanceHeuristic
 
 
@@ -20,6 +22,7 @@ class BiDirectionalAStar:
 
     @staticmethod
     def start_bidirectional_a_star(initial_state_representation, goal_state_representation, heuristic, time_limit):
+        start_timestamp = float(time.time())
         initial_state = StateNode(initial_state_representation,
                                   heuristic.calculate_heuristic_value(initial_state_representation), 0)
         BiDirectionalAStar.initial_state_rep = initial_state_representation
@@ -37,13 +40,19 @@ class BiDirectionalAStar:
         while BiDirectionalAStar.opened_front and BiDirectionalAStar.opened_back:
             front_state = heapq.heappop(BiDirectionalAStar.opened_front)
             BiDirectionalAStar.opened_front_dictionary.pop(front_state.get_state_representation().get_board_str())
-            # if front_state.get_state_representation().win_state():
-            #     print("Success")
-            #     BiDirectionalAStar.reset()
-            #     return
+            BiDirectionalAStar.closed_front.update(
+                {front_state.get_state_representation().get_board_str(): front_state})
+
+            if front_state.get_state_representation().win_state():
+                time_for_problem = float(time.time()) - start_timestamp
+                print("Success in " + str(time_for_problem))
+                print("Solution: " + front_state.get_state_representation().get_solution_path())
+                BiDirectionalAStar.reset()
+                return
             match_found = BiDirectionalAStar.connection_exists(front_state, Direction.FORWARD)
             if match_found is not None:
-                print("Success")
+                time_for_problem = float(time.time()) - start_timestamp
+                print("Success in " + str(time_for_problem))
                 backwards_path = BiDirectionalAStar.backwards(
                     match_found.get_state_representation().get_solution_path())
                 print("Solution: " + front_state.get_state_representation().get_solution_path() + backwards_path)
@@ -51,9 +60,11 @@ class BiDirectionalAStar:
                 return
             back_state = heapq.heappop(BiDirectionalAStar.opened_back)
             BiDirectionalAStar.opened_back_dictionary.pop(back_state.get_state_representation().get_board_str())
+            BiDirectionalAStar.closed_back.update({back_state.get_state_representation().get_board_str(): back_state})
             match_found = BiDirectionalAStar.connection_exists(back_state, Direction.BACKWARD)
             if match_found is not None:
-                print("Success")
+                time_for_problem = float(time.time()) - start_timestamp
+                print("Success in " + str(time_for_problem))
                 backwards_path = BiDirectionalAStar.backwards(back_state.get_state_representation().get_solution_path())
                 print("Solution: " + match_found.get_state_representation().get_solution_path() + backwards_path)
                 BiDirectionalAStar.reset()
@@ -133,6 +144,47 @@ class BiDirectionalAStar:
         return
 
     @staticmethod
+    def add_backwards_relevant_states(neighbour_states, opened, opened_dictionary, closed, heuristic, previous_depth,
+                                      vehicle_on_initial_board):
+        for state_representation in neighbour_states:
+            heuristic_value = heuristic.calculate_heuristic_value(state_representation, vehicle_on_initial_board)
+            opened_state = opened_dictionary.get(state_representation.get_board_str())
+            # state is not in the open heap
+            if opened_state is None:
+                closed_state = closed.get(state_representation.get_board_str())
+                # state wasn't visited before
+                if closed_state is None:
+                    # add it to the open heap
+                    a_star_node = StateNode(state_representation, heuristic_value, previous_depth + 1)
+                    heapq.heappush(opened, a_star_node)
+                    opened_dictionary.update({state_representation.get_board_str(): a_star_node})
+                    continue
+                else:
+                    # state is in closed list
+                    previous_heuristic_value = closed_state.get_heuristic_value()
+                    # if current heuristic value is better, delete the old node from closed and add the current to open
+                    if previous_heuristic_value > heuristic_value:
+                        closed.pop(closed_state.get_board_representation().get_board_str())
+                        a_star_node = StateNode(state_representation, heuristic_value, previous_depth + 1)
+                        heapq.heappush(opened, a_star_node)
+                        opened_dictionary.update({state_representation.get_board_str(): a_star_node})
+                    continue
+            else:
+                # state is in open list
+                previous_heuristic_value = opened_state.get_heuristic_value()
+                # heuristic value is better that the old one
+                if previous_heuristic_value > heuristic_value:
+                    # replace the old node with a new one with the new heuristic value in the open list
+                    opened.remove(opened_state)
+                    opened_dictionary.pop(opened_state.get_state_representation().get_board_str())
+                    heapq.heapify(opened)
+                    a_star_node = StateNode(state_representation, heuristic_value, previous_depth + 1)
+                    heapq.heappush(opened, a_star_node)
+                    opened_dictionary.update({state_representation.get_board_str(): a_star_node})
+                    continue
+        return
+
+    @staticmethod
     def backwards(path):
         solution_backwards = path.split(" ")
         solution_backwards.reverse()
@@ -159,44 +211,3 @@ class BiDirectionalAStar:
         BiDirectionalAStar.opened_front.clear()
         BiDirectionalAStar.closed_front.clear()
         BiDirectionalAStar.closed_back.clear()
-
-    @staticmethod
-    def add_backwards_relevant_states(neighbour_states, opened, opened_dictionary, closed, heuristic, previous_depth,
-                                      vehicle_on_initial_board):
-        for state_representation in neighbour_states:
-            heuristic_value = heuristic.calculate_heuristic_value(state_representation, vehicle_on_initial_board)
-            opened_state = opened_dictionary.get(state_representation.get_board_str())
-            # state is not in the open heap
-            if opened_state is None:
-                closed_state = closed.get(state_representation.get_board_str())
-                # state wasn't visited before
-                if closed_state is None:
-                    # add it to the open heap
-                    a_star_node = StateNode(state_representation, heuristic_value, previous_depth + 1)
-                    heapq.heappush(opened, a_star_node)
-                    opened_dictionary.update({state_representation.get_board_str(): a_star_node})
-                    continue
-                else:
-                    # state is in closed list
-                    # previous_heuristic_value = closed_state.get_heuristic_value()
-                    # # if current heuristic value is better, delete the old node from closed and add the current to open
-                    # if previous_heuristic_value > heuristic_value:
-                    #     closed.pop(closed_state.get_board_representation().get_board_str())
-                    #     a_star_node = StateNode(state_representation, heuristic_value, previous_depth + 1)
-                    #     heapq.heappush(opened, a_star_node)
-                    #     opened_dictionary.update({state_representation.get_board_str(): a_star_node})
-                    continue
-            else:
-                # state is in open list
-                previous_heuristic_value = opened_state.get_heuristic_value()
-                # heuristic value is better that the old one
-                if previous_heuristic_value > heuristic_value:
-                    # replace the old node with a new one with the new heuristic value in the open list
-                    opened.remove(opened_state)
-                    opened_dictionary.pop(opened_state.get_state_representation().get_board_str())
-                    heapq.heapify(opened)
-                    a_star_node = StateNode(state_representation, heuristic_value, previous_depth + 1)
-                    heapq.heappush(opened, a_star_node)
-                    opened_dictionary.update({state_representation.get_board_str(): a_star_node})
-                    continue
-        return
