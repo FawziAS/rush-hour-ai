@@ -1,8 +1,9 @@
 class StateNode:
-    def __init__(self, state_representation, heuristic_value, depth):
+    def __init__(self, state_representation, heuristic_value, depth, difficulty="NotDefined"):
         self._state_representation = state_representation
         self._heuristic_value = heuristic_value
         self._depth = depth
+        self._difficulty = difficulty
 
     def get_state_representation(self):
         return self._state_representation
@@ -15,5 +16,11 @@ class StateNode:
 
     def __lt__(self, other):
         if self._heuristic_value == other.get_heuristic_value():
-            return len(self._state_representation.get_solution_path()) < len(other.get_state_representation().get_solution_path())
+            if len(self._state_representation.get_solution_path()) == len(
+                    other.get_state_representation().get_solution_path()):
+                # TODO: Replace pass with appropriate difficulty equation
+                pass
+            else:
+                return len(self._state_representation.get_solution_path()) < len(
+                    other.get_state_representation().get_solution_path())
         return self._heuristic_value < other.get_heuristic_value()
