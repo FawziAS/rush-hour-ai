@@ -268,7 +268,7 @@ class Board:
                 last_car = self.get_board()[x_coordinate][i]
         return blocking_vehicles
 
-    def get_vehicle_theoretical_place(self,vehicle):
+    def get_vehicle_theoretical_place(self, vehicle):
         my_vehicle_x = self.get_vehicle('X').get_x_coordinate()
         up_moves = vehicle.get_size() - (my_vehicle_x - vehicle.get_x_coordinate())
         down_moves = vehicle.get_size() - up_moves + 1
@@ -280,3 +280,50 @@ class Board:
             return vehicle.get_x_coordinate() + down_moves
         else:
             return vehicle.get_x_coordinate() - up_moves
+
+    def get_possible_steps(self):
+        possible_steps = []
+
+        if self.win_state():
+            for i in range(1, self._board_size+1):
+                possible_steps.append("X" + "L" + str(i))
+                possible_steps.append("X" + "R" + str(i))
+            return possible_steps
+
+        for vehicle in self._vehicles_on_board:
+            if vehicle.get_orientation() == Orientation.HORIZONTAL:
+                # right move
+                for i in range(1, 5):
+                    success = self.move_vehicle_on_board(vehicle.get_name(), Direction.RIGHT, i)
+                    if success:
+                        self.move_vehicle_on_board(vehicle.get_name(), Direction.LEFT, i)
+                        possible_steps.append(vehicle.get_name() + "R" + str(i))
+                    else:
+                        break
+                # left move
+                for i in range(1, 5):
+                    success = self.move_vehicle_on_board(vehicle.get_name(), Direction.LEFT, i)
+                    if success:
+                        self.move_vehicle_on_board(vehicle.get_name(), Direction.RIGHT, i)
+                        possible_steps.append(vehicle.get_name() + "L" + str(i))
+                    else:
+                        break
+
+            if vehicle.get_orientation() == Orientation.VERTICAL:
+                # up move
+                for i in range(1, 5):
+                    success = self.move_vehicle_on_board(vehicle.get_name(), Direction.UP, i)
+                    if success:
+                        self.move_vehicle_on_board(vehicle.get_name(), Direction.DOWN, i)
+                        possible_steps.append(vehicle.get_name() + "U" + str(i))
+                    else:
+                        break
+                # down move
+                for i in range(1, 5):
+                    success = self.move_vehicle_on_board(vehicle.get_name(), Direction.DOWN, i)
+                    if success:
+                        self.move_vehicle_on_board(vehicle.get_name(), Direction.UP, i)
+                        possible_steps.append(vehicle.get_name() + "D" + str(i))
+                    else:
+                        break
+        return possible_steps

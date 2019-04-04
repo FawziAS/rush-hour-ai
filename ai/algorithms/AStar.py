@@ -21,6 +21,7 @@ class AStar:
     branching_factor = 0
     starting_timestamp = 0
     finishing_timestamp = 0
+    win_state = None
 
     @staticmethod
     def start_a_star(initial_state_representation, heuristic, time_limit, heuristic_limit=-1):
@@ -54,6 +55,7 @@ class AStar:
                 AStar.win_depth = state.get_depth()
                 print(
                     "Solution: " + state.get_state_representation().get_solution_path() + state.get_state_representation().get_last_move())
+                AStar.win_state = state.get_state_representation()
                 return True
             neighbor_states = state.get_state_representation().get_neighbours()
             # AStar.nodes_num += len(neighbor_states)
@@ -125,6 +127,10 @@ class AStar:
         return info
 
     @staticmethod
+    def get_win_state():
+        return AStar.win_state
+
+    @staticmethod
     def reset():
         AStar.opened.clear()
         AStar.closed.clear()
@@ -138,3 +144,4 @@ class AStar:
         AStar.branching_factor = 0
         AStar.starting_timestamp = 0
         AStar.finishing_timestamp = 0
+        AStar.win_state = None

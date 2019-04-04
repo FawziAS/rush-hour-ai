@@ -43,7 +43,7 @@ def main():
             problem_counter += 1
             print("----------------------------------------")
         input_file.close()
-    except Exception as e:
+    except FileNotFoundError as e:
         logging.exception("Failed to open file.", e)
 
 
