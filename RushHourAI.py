@@ -58,14 +58,14 @@ def main():
         FILE_PATH = sys.argv[1]
         algorithm = int(sys.argv[2])
         if algorithm == Algorithm.PERCEPRTON.value:
-            if len(sys.argv == 3):
+            if len(sys.argv) == 3:
                 heuristic_used = get_heuristic("")
             else:
                 heuristic_used = get_heuristic(sys.argv[3])
         elif len(sys.argv) < 5:
             raise Exception("Missing commandline arguments.")
         else:
-            heuristic_used = int(sys.argv[3])
+            heuristic_used = get_heuristic(sys.argv[3])
             arg_time_limit = int(sys.argv[4])
             if algorithm == Algorithm.ASTAR.value:
                 if len(sys.argv) == 6:
@@ -77,11 +77,10 @@ def main():
                     goals_file = open(sys.argv[5], 'r')
                     goals = goals_file.readlines()
 
-        inputs = input_file.readlines()
         input_file = open(FILE_PATH, 'r')
+        inputs = input_file.readlines()
 
         # taking each line in input and converting it to a Board object
-        algorithm = int(sys.argv[3])  # insert number of algorithm
         for i in range(len(inputs)):
             print("Problem " + str(i + 1))
             board_difficulty = inputs[i].split(" ")
@@ -92,6 +91,7 @@ def main():
             # running AStar algorithm, to solve the current board.
             if algorithm == Algorithm.ASTAR.value:
                 if use_difficulty == 1:
+                    print("Using difficulty...")
                     run_astar(initial_board, heuristic_used, arg_time_limit, difficulty)
                 else:
                     run_astar(initial_board, heuristic_used, arg_time_limit, Difficulty.NOT_DEFINED)
@@ -126,7 +126,6 @@ def run_astar(initial_board, heuristic, time_limit, difficulty):
 
 def run_idastar(initial_board, heuristic, time_limit):
     IDAStar.start_idas(initial_board, heuristic, time_limit)
-    IDS.start_ids(initial_board, 40)
 
 
 def run_bidirectional(initial_board, goal_board, heuristic, time_limit):

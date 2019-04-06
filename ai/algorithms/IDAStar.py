@@ -32,8 +32,8 @@ class IDAStar:
 
     @staticmethod
     def reset():
-        searched_nodes = 0
-        num_of_nodes = 0
+        IDAStar.searched_nodes = 0
+        IDAStar.num_of_nodes = 0
 
     @staticmethod
     def get_game_info():
