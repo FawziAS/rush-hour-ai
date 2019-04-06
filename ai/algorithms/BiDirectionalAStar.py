@@ -99,8 +99,8 @@ class BiDirectionalAStar:
 
             BiDirectionalAStar.add_backwards_relevant_states(back_neighbours, BiDirectionalAStar.opened_back,
                                                              BiDirectionalAStar.opened_back_dictionary,
-                                                             BiDirectionalAStar.closed_back, TotalDistanceHeuristic,
-                                                             back_state.get_depth(), vehicles_on_initial_board)
+                                                             BiDirectionalAStar.closed_back, heuristic,goal_state_representation,
+                                                             back_state.get_depth())
             curr_time = time.time() - BiDirectionalAStar.starting_timestamp
         print("Failed")
         return
@@ -167,10 +167,9 @@ class BiDirectionalAStar:
         return
 
     @staticmethod
-    def add_backwards_relevant_states(neighbour_states, opened, opened_dictionary, closed, heuristic, previous_depth,
-                                      vehicle_on_initial_board):
+    def add_backwards_relevant_states(neighbour_states, opened, opened_dictionary, closed, heuristic,goal_state, previous_depth):
         for state_representation in neighbour_states:
-            heuristic_value = heuristic.calculate_heuristic_value(state_representation, vehicle_on_initial_board)
+            heuristic_value =heuristic.calculate_heuristic_value(goal_state) - heuristic.calculate_heuristic_value(state_representation)
             opened_state = opened_dictionary.get(state_representation.get_board_str())
             # state is not in the open heap
             if opened_state is None:
@@ -188,7 +187,7 @@ class BiDirectionalAStar:
                     previous_heuristic_value = closed_state.get_heuristic_value()
                     # if current heuristic value is better, delete the old node from closed and add the current to open
                     if previous_heuristic_value > heuristic_value:
-                        closed.pop(closed_state.get_board_representation().get_board_str())
+                        closed.pop(closed_state.get_state_representation().get_board_str())
                         a_star_node = StateNode(state_representation, heuristic_value, previous_depth + 1)
                         heapq.heappush(opened, a_star_node)
                         opened_dictionary.update({state_representation.get_board_str(): a_star_node})

@@ -91,7 +91,6 @@ def main():
             # running AStar algorithm, to solve the current board.
             if algorithm == Algorithm.ASTAR.value:
                 if use_difficulty == 1:
-                    print("Using difficulty...")
                     run_astar(initial_board, heuristic_used, arg_time_limit, difficulty)
                 else:
                     run_astar(initial_board, heuristic_used, arg_time_limit, Difficulty.NOT_DEFINED)
@@ -118,7 +117,6 @@ def main():
 
 
 def run_astar(initial_board, heuristic, time_limit, difficulty):
-    print("Running AStar Algorithm")
     AStar.start_a_star(initial_board, heuristic, time_limit, difficulty)
     print(AStar.get_game_info())
     AStar.reset()  # resetting the global variables and structures that AStar stores.
