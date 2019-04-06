@@ -78,6 +78,7 @@ class AStar:
                 return
         for state_representation in neighbor_states:
             heuristic_value = heuristic.calculate_heuristic_value(state_representation)
+            # We check if we are limited to a certain heuristic value. If yes, and we've surpassed it we don't add the node.
             if heuristic_limit != -1 and heuristic_value > heuristic_limit:
                 continue
             opened_state = AStar.opened_dictionary.get(state_representation.get_board_str())
