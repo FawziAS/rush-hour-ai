@@ -3,8 +3,7 @@ import time
 from enum import Enum
 
 from ai.algorithms.StateNode import StateNode
-from ai.heuristics.AdvancedBlockingHeuristic import AdvancedBlockingHeuristic
-from ai.heuristics.TotalDistanceHeuristic import TotalDistanceHeuristic
+from ai.heuristics.BackwardsBlockingHeuristic import BackwardsBlockingHeuristic
 
 
 class Direction(Enum):
@@ -13,62 +12,97 @@ class Direction(Enum):
 
 
 class BiDirectionalAStar:
+    starting_timestamp = 0
+    finishing_timestamp = 0
+    searched_nodes = 0
+    nodes_num = 0
+    sum_heuristic = 0
+    win_depth = 0
+    min_depth = 0
+    max_depth = 0
+    sum_depth = 0
     opened_front = []
     opened_front_dictionary = {}
     opened_back = []
     opened_back_dictionary = {}
     closed_front = {}
     closed_back = {}
+    min_solution = ""
 
     @staticmethod
-    def start_bidirectional_a_star(initial_state_representation, goal_state_representation, heuristic, time_limit):
-        start_timestamp = float(time.time())
+    def start_bidirectional_a_star(initial_state_representation, goal_state_representation, optimal_solution, heuristic,
+                                   time_limit):
+        BiDirectionalAStar.reset()
+        BiDirectionalAStar.min_solution = optimal_solution
+        BiDirectionalAStar.starting_timestamp = float(time.time())
+        goal_state_representation.set_solution_path(
+            BiDirectionalAStar.backwards(goal_state_representation.get_last_move()))
         initial_state = StateNode(initial_state_representation,
                                   heuristic.calculate_heuristic_value(initial_state_representation), 0)
         BiDirectionalAStar.initial_state_rep = initial_state_representation
         vehicles_on_initial_board = initial_state_representation.get_vehicles_on_board()
         goal_state = StateNode(goal_state_representation,
-                               TotalDistanceHeuristic.calculate_heuristic_value(goal_state_representation,
-                                                                                vehicles_on_initial_board), 0)
+                               BackwardsBlockingHeuristic.calculate_heuristic_value(goal_state_representation), 0)
 
         # Added initial states
         heapq.heappush(BiDirectionalAStar.opened_front, initial_state)
         BiDirectionalAStar.opened_front_dictionary.update({initial_state_representation.get_board_str(): initial_state})
         heapq.heappush(BiDirectionalAStar.opened_back, goal_state)
         BiDirectionalAStar.opened_back_dictionary.update({goal_state_representation.get_board_str(): goal_state})
-
-        while BiDirectionalAStar.opened_front and BiDirectionalAStar.opened_back:
+        current_solution = ""
+        curr_time = float(time.time()) - BiDirectionalAStar.starting_timestamp
+        while BiDirectionalAStar.opened_front and BiDirectionalAStar.opened_back and (
+                curr_time - BiDirectionalAStar.starting_timestamp) < time_limit:
             front_state = heapq.heappop(BiDirectionalAStar.opened_front)
+
+            BiDirectionalAStar.searched_nodes += 1
+            BiDirectionalAStar.sum_heuristic += front_state.get_heuristic_value()
+            BiDirectionalAStar.sum_depth += front_state.get_depth()
+
             BiDirectionalAStar.opened_front_dictionary.pop(front_state.get_state_representation().get_board_str())
             BiDirectionalAStar.closed_front.update(
                 {front_state.get_state_representation().get_board_str(): front_state})
 
             if front_state.get_state_representation().win_state():
-                time_for_problem = float(time.time()) - start_timestamp
-                print("Success in " + str(time_for_problem))
-                print("Solution: " + front_state.get_state_representation().get_solution_path())
-                BiDirectionalAStar.reset()
-                return
+                current_solution = front_state.get_state_representation().get_solution_path() + front_state.get_state_representation().get_last_move()
+                if len(BiDirectionalAStar.min_solution) >= len(current_solution):
+                    BiDirectionalAStar.min_solution = current_solution
+                    BiDirectionalAStar.finishing_timestamp = time.time()
+                    BiDirectionalAStar.win_depth = front_state.get_depth()
+                    break
+                else:
+                    continue
             match_found = BiDirectionalAStar.connection_exists(front_state, Direction.FORWARD)
             if match_found is not None:
-                time_for_problem = float(time.time()) - start_timestamp
-                print("Success in " + str(time_for_problem))
                 backwards_path = BiDirectionalAStar.backwards(
                     match_found.get_state_representation().get_solution_path())
-                print("Solution: " + front_state.get_state_representation().get_solution_path() + backwards_path)
-                BiDirectionalAStar.reset()
-                return
+                current_solution = front_state.get_state_representation().get_solution_path() + backwards_path
+                if len(BiDirectionalAStar.min_solution) >= len(current_solution):
+                    BiDirectionalAStar.min_solution = current_solution
+                    BiDirectionalAStar.finishing_timestamp = time.time()
+                    BiDirectionalAStar.win_depth = front_state.get_depth() + match_found.get_depth()
+                    break
+                else:
+                    continue
             back_state = heapq.heappop(BiDirectionalAStar.opened_back)
+
+            BiDirectionalAStar.searched_nodes += 1
+            BiDirectionalAStar.sum_heuristic += back_state.get_heuristic_value()
+            BiDirectionalAStar.sum_depth += back_state.get_depth()
+
             BiDirectionalAStar.opened_back_dictionary.pop(back_state.get_state_representation().get_board_str())
             BiDirectionalAStar.closed_back.update({back_state.get_state_representation().get_board_str(): back_state})
             match_found = BiDirectionalAStar.connection_exists(back_state, Direction.BACKWARD)
             if match_found is not None:
-                time_for_problem = float(time.time()) - start_timestamp
-                print("Success in " + str(time_for_problem))
                 backwards_path = BiDirectionalAStar.backwards(back_state.get_state_representation().get_solution_path())
-                print("Solution: " + match_found.get_state_representation().get_solution_path() + backwards_path)
-                BiDirectionalAStar.reset()
-                return
+                current_solution = match_found.get_state_representation().get_solution_path() + backwards_path
+                if len(BiDirectionalAStar.min_solution) >= len(current_solution):
+                    BiDirectionalAStar.min_solution = current_solution
+                    BiDirectionalAStar.finishing_timestamp = time.time()
+                    BiDirectionalAStar.win_depth = match_found.get_depth() + back_state.get_depth()
+                    break
+                else:
+                    continue
 
             front_neighbours = front_state.get_state_representation().get_neighbours()
             back_neighbours = back_state.get_state_representation().get_neighbours()
@@ -80,9 +114,19 @@ class BiDirectionalAStar:
 
             BiDirectionalAStar.add_backwards_relevant_states(back_neighbours, BiDirectionalAStar.opened_back,
                                                              BiDirectionalAStar.opened_back_dictionary,
-                                                             BiDirectionalAStar.closed_back, TotalDistanceHeuristic,
+                                                             BiDirectionalAStar.closed_back, BackwardsBlockingHeuristic,
                                                              back_state.get_depth(), vehicles_on_initial_board)
-        print("Failed")
+            curr_time = float(time.time()) - BiDirectionalAStar.starting_timestamp
+        if current_solution == "" or (
+                BiDirectionalAStar.finishing_timestamp - BiDirectionalAStar.starting_timestamp) > time_limit:
+            print("Failed")
+        elif len(current_solution) != len(BiDirectionalAStar.min_solution):
+            if (not BiDirectionalAStar.opened_front) or (not BiDirectionalAStar.opened_back):
+                BiDirectionalAStar.finishing_timestamp = time.time()
+        print("Solution: " + current_solution)
+        print(BiDirectionalAStar.get_game_info())
+            # time_for_problem = float(time.time()) - starting_timestamp
+            # print("Success in " + str(time_for_problem))
         return
 
     @staticmethod
@@ -117,6 +161,7 @@ class BiDirectionalAStar:
                     a_star_node = StateNode(state_representation, heuristic_value, previous_depth + 1)
                     heapq.heappush(opened, a_star_node)
                     opened_dictionary.update({state_representation.get_board_str(): a_star_node})
+                    BiDirectionalAStar.nodes_num += 1
                     continue
                 else:
                     # state is in closed list
@@ -127,6 +172,7 @@ class BiDirectionalAStar:
                         a_star_node = StateNode(state_representation, heuristic_value, previous_depth + 1)
                         heapq.heappush(opened, a_star_node)
                         opened_dictionary.update({state_representation.get_board_str(): a_star_node})
+                        BiDirectionalAStar.nodes_num += 1
                     continue
             else:
                 # state is in open list
@@ -140,6 +186,7 @@ class BiDirectionalAStar:
                     a_star_node = StateNode(state_representation, heuristic_value, previous_depth + 1)
                     heapq.heappush(opened, a_star_node)
                     opened_dictionary.update({state_representation.get_board_str(): a_star_node})
+                    BiDirectionalAStar.nodes_num += 1
                     continue
         return
 
@@ -147,7 +194,10 @@ class BiDirectionalAStar:
     def add_backwards_relevant_states(neighbour_states, opened, opened_dictionary, closed, heuristic, previous_depth,
                                       vehicle_on_initial_board):
         for state_representation in neighbour_states:
-            heuristic_value = heuristic.calculate_heuristic_value(state_representation, vehicle_on_initial_board)
+            # if state_representation.win_state():
+            #     state_representation.reset_solution_path()
+            #     state_representation.set_solution_path(BiDirectionalAStar.backwards(state_representation.get_last_move()))
+            heuristic_value = heuristic.calculate_heuristic_value(state_representation)
             opened_state = opened_dictionary.get(state_representation.get_board_str())
             # state is not in the open heap
             if opened_state is None:
@@ -158,6 +208,7 @@ class BiDirectionalAStar:
                     a_star_node = StateNode(state_representation, heuristic_value, previous_depth + 1)
                     heapq.heappush(opened, a_star_node)
                     opened_dictionary.update({state_representation.get_board_str(): a_star_node})
+                    BiDirectionalAStar.nodes_num += 1
                     continue
                 else:
                     # state is in closed list
@@ -168,6 +219,7 @@ class BiDirectionalAStar:
                         a_star_node = StateNode(state_representation, heuristic_value, previous_depth + 1)
                         heapq.heappush(opened, a_star_node)
                         opened_dictionary.update({state_representation.get_board_str(): a_star_node})
+                        BiDirectionalAStar.nodes_num += 1
                     continue
             else:
                 # state is in open list
@@ -181,6 +233,7 @@ class BiDirectionalAStar:
                     a_star_node = StateNode(state_representation, heuristic_value, previous_depth + 1)
                     heapq.heappush(opened, a_star_node)
                     opened_dictionary.update({state_representation.get_board_str(): a_star_node})
+                    BiDirectionalAStar.nodes_num += 1
                     continue
         return
 
@@ -204,6 +257,18 @@ class BiDirectionalAStar:
         return solution
 
     @staticmethod
+    def get_game_info():
+        info = ""
+        info += "Solved in: " + str(
+            BiDirectionalAStar.finishing_timestamp - BiDirectionalAStar.starting_timestamp) + " Seconds.\n"
+        info += "SearchedNodes: " + str(BiDirectionalAStar.searched_nodes) + "\n"
+        info += "Penetrance: " + str(BiDirectionalAStar.win_depth / BiDirectionalAStar.searched_nodes) + "\n"
+        info += "Avg. Heuristic: " + str(BiDirectionalAStar.sum_heuristic / BiDirectionalAStar.searched_nodes) + "\n"
+        info += "EBF: " + str(BiDirectionalAStar.nodes_num / BiDirectionalAStar.searched_nodes) + "\n"
+        info += "Avg. Depth: " + str(BiDirectionalAStar.sum_depth / BiDirectionalAStar.searched_nodes) + "\n"
+        return info
+
+    @staticmethod
     def reset():
         BiDirectionalAStar.opened_back_dictionary.clear()
         BiDirectionalAStar.opened_front_dictionary.clear()
@@ -211,3 +276,13 @@ class BiDirectionalAStar:
         BiDirectionalAStar.opened_front.clear()
         BiDirectionalAStar.closed_front.clear()
         BiDirectionalAStar.closed_back.clear()
+        BiDirectionalAStar.min_solution = ""
+        BiDirectionalAStar.starting_timestamp = 0
+        BiDirectionalAStar.finishing_timestamp = 0
+        BiDirectionalAStar.searched_nodes = 0
+        BiDirectionalAStar.nodes_num = 0
+        BiDirectionalAStar.sum_heuristic = 0
+        BiDirectionalAStar.win_depth = 0
+        BiDirectionalAStar.min_depth = 0
+        BiDirectionalAStar.max_depth = 0
+        BiDirectionalAStar.sum_depth = 0

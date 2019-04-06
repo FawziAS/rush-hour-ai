@@ -8,7 +8,7 @@ from rush_hour.Vehicle import Orientation
 class PerceptronLearning:
     actions_dictionary = {}
 
-    def __init__(self, initial_board, heuristic, time_limit):
+    def __init__(self, initial_board, heuristic, time_limit=30):
         vehicles = initial_board.get_vehicles_on_board()
         optimal_solution_steps = self.get_a_star_solution(initial_board, heuristic, time_limit)
         for depth in range(len(optimal_solution_steps)):
@@ -23,10 +23,12 @@ class PerceptronLearning:
                         self.actions_dictionary.update({str(depth) + vehicle.get_name() + "D" + str(i): 0})
 
         self.train_the_agent(initial_board, optimal_solution_steps, time_limit)
-        print("Perceptron solution: " + self.get_solution_from_dictionary(initial_board, optimal_solution_steps))
-        # TODO: Print actions' weights.
-        actions_weights = ""
-        print(actions_weights)
+        print("Trying to solve...")
+        perceptron_solution = self.get_solution_from_dictionary(initial_board, optimal_solution_steps)
+        print("Perceptron solution: " + perceptron_solution)
+        weights_on_steps, min_path_cost = self.get_solution_steps_weights(perceptron_solution)
+        print(weights_on_steps)
+        print("Minimum cost path's cost: " + str(min_path_cost))
 
     def get_a_star_solution(self, initial_board, heuristic, time_limit):
         board = Board(initial_board.get_board_str())
@@ -40,6 +42,7 @@ class PerceptronLearning:
         return solution_steps
 
     def train_the_agent(self, initial_board, a_star_solution_steps, time_limit):
+        print("Learning from the A* solution...")
         a_star_solution = ""
         for step in a_star_solution_steps:
             a_star_solution += step + " "
@@ -80,19 +83,18 @@ class PerceptronLearning:
             board.move_vehicle_on_board(move[0], Direction.RIGHT, int(move[2]))
 
     def update_weights(self, a_star_solution_steps, perceptron_solution_steps):
-        i = 0
-        for action in a_star_solution_steps:
-            step_value = self.actions_dictionary.get(str(i) + action)
-            step_value -= 1
-            self.actions_dictionary.update({str(i) + action: step_value})
-            i += 1
-        i = 0
-        for action in perceptron_solution_steps:
-            step_value = self.actions_dictionary.get(str(i) + action)
-            step_value += 1
-            self.actions_dictionary.update({str(i) + action: step_value})
-            i += 1
-
+        # i = 0
+        # for action in a_star_solution_steps:
+        #     step_value = self.actions_dictionary.get(str(i) + action)
+        #     step_value -= 1
+        #     self.actions_dictionary.update({str(i) + action: step_value})
+        #     i += 1
+        # i = 0
+        # for action in perceptron_solution_steps:
+        #     step_value = self.actions_dictionary.get(str(i) + action)
+        #     step_value += 1
+        #     self.actions_dictionary.update({str(i) + action: step_value})
+        #     i += 1
         for i in range(len(a_star_solution_steps)):
             if a_star_solution_steps[i] == perceptron_solution_steps[i]:
                 step_value = self.actions_dictionary.get(str(i) + perceptron_solution_steps[i])
@@ -123,3 +125,15 @@ class PerceptronLearning:
             i += 1
         possible_solution += board.get_last_move()
         return possible_solution.strip()
+
+    def get_solution_steps_weights(self, solution_steps):
+        steps = solution_steps.strip().split(" ")
+        steps_weights_str = ""
+        minimum_cost_path_cost = 0
+        for i in range(len(steps)):
+            steps_weights_str += "{ Step" + str(i) + "_" + steps[i] + " : "
+            step_value = self.actions_dictionary.get(str(i) + steps[i])
+            steps_weights_str += str(step_value)
+            steps_weights_str += " } "
+            minimum_cost_path_cost += step_value
+        return steps_weights_str, minimum_cost_path_cost

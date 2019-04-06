@@ -4,6 +4,7 @@ import time
 import ai.heuristics
 
 from ai.algorithms.StateNode import StateNode
+from ai.utils.Difficulty import Difficulty
 
 
 class AStar:
@@ -24,8 +25,10 @@ class AStar:
     win_state = None
 
     @staticmethod
-    def start_a_star(initial_state_representation, heuristic, time_limit, heuristic_limit=-1):
+    def start_a_star(initial_state_representation, heuristic, time_limit, difficulty=Difficulty.NOT_DEFINED,
+                     heuristic_limit=-1):
         # TODO: Change the return value from bool to Object or None (WinState)
+        AStar.reset()
         AStar.starting_timestamp = int(time.time())
         state = StateNode(initial_state_representation,
                           heuristic.calculate_heuristic_value(initial_state_representation), 1)
@@ -59,7 +62,7 @@ class AStar:
                 return True
             neighbor_states = state.get_state_representation().get_neighbours()
             # AStar.nodes_num += len(neighbor_states)
-            AStar.add_relevant_states(neighbor_states, heuristic, state.get_depth(), heuristic_limit)
+            AStar.add_relevant_states(neighbor_states, heuristic, state.get_depth(), difficulty, heuristic_limit)
             AStar.closed.update({state.get_state_representation().get_board_str(): state})
             previous_state = state
             curr_time = float(time.time()) - AStar.starting_timestamp
@@ -69,7 +72,10 @@ class AStar:
 
     # adds the relevant states to the heap
     @staticmethod
-    def add_relevant_states(neighbor_states, heuristic, previous_depth, heuristic_limit=-1):
+    def add_relevant_states(neighbor_states, heuristic, previous_depth, difficulty, heuristic_limit=-1):
+        if difficulty is not Difficulty.NOT_DEFINED:
+            if AStar.check_not_possible(previous_depth, difficulty):
+                return
         for state_representation in neighbor_states:
             heuristic_value = heuristic.calculate_heuristic_value(state_representation)
             if heuristic_limit != -1 and heuristic_value > heuristic_limit:
@@ -124,6 +130,7 @@ class AStar:
         info += "MinimumDepth: " + str(AStar.min_depth) + "\n"
         info += "MaxDepth: " + str(AStar.max_depth) + "\n"
         info += "Avg. Depth: " + str(AStar.sum_depth / AStar.searched_nodes) + "\n"
+        info += "WinDepth: " + str(AStar.win_depth)
         return info
 
     @staticmethod
@@ -145,3 +152,19 @@ class AStar:
         AStar.starting_timestamp = 0
         AStar.finishing_timestamp = 0
         AStar.win_state = None
+
+    @staticmethod
+    def check_not_possible(previous_depth, difficulty):
+        if difficulty == Difficulty.BEGINNER:
+            if previous_depth > 25:
+                return 1
+        elif difficulty == Difficulty.INTERMEDIATE:
+            if previous_depth > 35:
+                return 1
+        elif difficulty == Difficulty.ADVANCED:
+            if previous_depth > 50:
+                return 1
+        elif difficulty == Difficulty.EXPERT:
+            if previous_depth > 60:
+                return 1
+        return 0

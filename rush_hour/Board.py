@@ -45,6 +45,9 @@ class Board:
     def get_solution_path(self):
         return self._solution_path
 
+    def reset_solution_path(self):
+        self._solution_path = ""
+
     def get_last_move(self):
         my_vehicle = self.get_vehicle("X")
         return "XR" + str(self._board_size - my_vehicle.get_y_coordinate())
