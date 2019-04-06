@@ -38,8 +38,7 @@ class BiDirectionalAStar:
         goal_state_representation.set_solution_path(
             BiDirectionalAStar.backwards(goal_state_representation.get_last_move()))
         goal_state = StateNode(goal_state_representation,
-                               TotalDistanceHeuristic.calculate_heuristic_value(goal_state_representation,
-                                                                                vehicles_on_initial_board), 0)
+                               0, 0)
 
         # Added initial states
         heapq.heappush(BiDirectionalAStar.opened_front, initial_state)
