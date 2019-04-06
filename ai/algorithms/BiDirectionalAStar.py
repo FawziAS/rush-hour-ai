@@ -48,21 +48,16 @@ class BiDirectionalAStar:
         BiDirectionalAStar.opened_back_dictionary.update({goal_state_representation.get_board_str(): goal_state})
         curr_time = time.time() - BiDirectionalAStar.starting_timestamp
         while BiDirectionalAStar.opened_front and BiDirectionalAStar.opened_back and curr_time < time_limit:
+            # Get the heuristically best state from the first AStar and try to match it form the second AStar.
             front_state = heapq.heappop(BiDirectionalAStar.opened_front)
             BiDirectionalAStar.opened_front_dictionary.pop(front_state.get_state_representation().get_board_str())
             BiDirectionalAStar.closed_front.update(
                 {front_state.get_state_representation().get_board_str(): front_state})
-
+            # For analysis purposes.
             BiDirectionalAStar.searched_nodes += 1
             BiDirectionalAStar.sum_depth += front_state.get_depth()
             BiDirectionalAStar.sum_heuristic += front_state.get_heuristic_value()
 
-            # if front_state.get_state_representation().win_state():
-            #     BiDirectionalAStar.finishing_timestamp = float(time.time())
-            #     BiDirectionalAStar.win_depth = front_state.get_depth()
-            #     print("Solution: " + front_state.get_state_representation().get_solution_path())
-            #     print(BiDirectionalAStar.get_game_info())
-            #     return
             match_found = BiDirectionalAStar.connection_exists(front_state, Direction.FORWARD)
             if match_found is not None:
                 BiDirectionalAStar.finishing_timestamp = float(time.time())
@@ -72,6 +67,7 @@ class BiDirectionalAStar:
                 print("Solution: " + front_state.get_state_representation().get_solution_path() + backwards_path)
                 print(BiDirectionalAStar.get_game_info())
                 return
+            # Get the heuristically best state from the second AStar and try to match it form the first AStar.
             back_state = heapq.heappop(BiDirectionalAStar.opened_back)
             BiDirectionalAStar.opened_back_dictionary.pop(back_state.get_state_representation().get_board_str())
             BiDirectionalAStar.closed_back.update({back_state.get_state_representation().get_board_str(): back_state})
@@ -89,6 +85,7 @@ class BiDirectionalAStar:
                 print(BiDirectionalAStar.get_game_info())
                 return
 
+            # If no match has been found expand the best nodes (heuristically) from both sides.
             front_neighbours = front_state.get_state_representation().get_neighbours()
             back_neighbours = back_state.get_state_representation().get_neighbours()
 
@@ -99,7 +96,8 @@ class BiDirectionalAStar:
 
             BiDirectionalAStar.add_backwards_relevant_states(back_neighbours, BiDirectionalAStar.opened_back,
                                                              BiDirectionalAStar.opened_back_dictionary,
-                                                             BiDirectionalAStar.closed_back, heuristic,goal_state_representation,
+                                                             BiDirectionalAStar.closed_back, heuristic,
+                                                             goal_state_representation,
                                                              back_state.get_depth())
             curr_time = time.time() - BiDirectionalAStar.starting_timestamp
         print("Failed")
@@ -107,6 +105,7 @@ class BiDirectionalAStar:
 
     @staticmethod
     def connection_exists(state, search_direction):
+        # Checks if a there is a connection.
         if search_direction == Direction.FORWARD:
             match = BiDirectionalAStar.opened_back_dictionary.get(state.get_state_representation().get_board_str())
             if match is not None:
@@ -167,9 +166,11 @@ class BiDirectionalAStar:
         return
 
     @staticmethod
-    def add_backwards_relevant_states(neighbour_states, opened, opened_dictionary, closed, heuristic,goal_state, previous_depth):
+    def add_backwards_relevant_states(neighbour_states, opened, opened_dictionary, closed, heuristic, goal_state,
+                                      previous_depth):
         for state_representation in neighbour_states:
-            heuristic_value =heuristic.calculate_heuristic_value(goal_state) - heuristic.calculate_heuristic_value(state_representation)
+            heuristic_value = heuristic.calculate_heuristic_value(goal_state) - heuristic.calculate_heuristic_value(
+                state_representation)
             opened_state = opened_dictionary.get(state_representation.get_board_str())
             # state is not in the open heap
             if opened_state is None:
@@ -211,6 +212,7 @@ class BiDirectionalAStar:
 
     @staticmethod
     def backwards(path):
+        # Reverse the solution path for the second AStar.
         solution_backwards = path.split(" ")
         solution_backwards.reverse()
         solution = ""
@@ -242,6 +244,7 @@ class BiDirectionalAStar:
 
     @staticmethod
     def reset():
+        # Reset Bidirectional AStar.
         BiDirectionalAStar.opened_back_dictionary.clear()
         BiDirectionalAStar.opened_front_dictionary.clear()
         BiDirectionalAStar.opened_back.clear()
