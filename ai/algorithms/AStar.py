@@ -98,7 +98,7 @@ class AStar:
                     previous_heuristic_value = closed_state.get_heuristic_value()
                     # if current heuristic value is better, delete the old node from closed and add the current to open
                     if previous_heuristic_value > heuristic_value:
-                        AStar.closed.pop(closed_state.get_board_representation().get_board_str())
+                        AStar.closed.pop(closed_state.get_state_representation().get_board_str())
                         a_star_node = StateNode(state_representation, heuristic_value, previous_depth + 1)
                         heapq.heappush(AStar.opened, a_star_node)
                         AStar.opened_dictionary.update({state_representation.get_board_str(): a_star_node})
